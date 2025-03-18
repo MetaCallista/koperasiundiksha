@@ -1,17 +1,9 @@
-# koperasi_undiksha
-
-
 ## Screenshot Hasil Debug Aplikasi
 
+Tampilan utama aplikasi:
 
+![Home Screen](assets/screenshots/home_screen.png)
 
-This project is a starting point for a Flutter application.
+Halaman Login:
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+![Login Screen](assets/screenshots/login_screen.png)
