@@ -10,21 +10,21 @@ class CustomButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blue.shade900, // Warna biru tua sesuai desain
+        backgroundColor: Colors.blue.shade900, 
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30), // Lebih membulat seperti di gambar
+          borderRadius: BorderRadius.circular(30), 
         ),
         padding: EdgeInsets.symmetric(horizontal: 60, vertical: 15),
-        elevation: 5, // Efek bayangan agar lebih tegas
-        shadowColor: Colors.black45, // Warna bayangan untuk efek depth
+        elevation: 5, 
+        shadowColor: Colors.black45, 
       ),
       onPressed: onPressed,
       child: Text(
         text,
         style: TextStyle(
           fontSize: 16,
-          fontWeight: FontWeight.bold, // Bold agar lebih jelas
-          color: Colors.white, // Warna teks putih
+          fontWeight: FontWeight.bold, 
+          color: Colors.white, 
         ),
       ),
     );
