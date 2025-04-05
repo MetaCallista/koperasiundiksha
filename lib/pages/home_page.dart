@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/profile_card.dart';
 import '../widgets/custom_menu_button.dart';
 import '../widgets/bottom_navbar.dart';
+import '../widgets/app_colors.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -9,7 +10,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 1; // Indeks halaman aktif
+  int _selectedIndex = 1;
 
   void _onNavItemTapped(int index) {
     setState(() {
@@ -20,97 +21,153 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(
+        automaticallyImplyLeading: false,
+        title: const Text(
           "Koperasi Undiksha",
-          style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 18,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.blue.shade900,
+        backgroundColor: AppColors.primary,
         actions: [
           IconButton(
-            icon: Icon(Icons.logout, color: Colors.white),
+            icon: const Icon(Icons.logout, color: Colors.white),
             onPressed: () {
-              // Mengarahkan ke halaman login
               Navigator.pushReplacementNamed(context, '/login');
             },
           ),
         ],
       ),
       body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ProfileCard(
+            const ProfileCard(
               name: "Putu Meta Callista",
               balance: "Rp. 1.200.000",
               imagePath: 'assets/profile.jpg',
             ),
-            SizedBox(height: 10),
-
+            const SizedBox(height: 10),
             Container(
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.background,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.grey.shade300, width: 1),
+                border: Border.all(color: AppColors.border, width: 1),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
+                    color: AppColors.shadow.withOpacity(0.2),
                     blurRadius: 3,
-                    offset: Offset(0, 1),
+                    offset: const Offset(0, 1),
                   ),
                 ],
               ),
               child: GridView.count(
-                shrinkWrap: true, 
-                physics: NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
                 crossAxisCount: 3,
                 mainAxisSpacing: 8,
                 crossAxisSpacing: 8,
-                childAspectRatio: 1.1, 
+                childAspectRatio: 1.1,
                 children: [
-                  CustomMenuButton(label: "Saldo", icon: Icons.account_balance_wallet, onPressed: () {}),
-                  CustomMenuButton(label: "Transfer", icon: Icons.send, onPressed: () {}),
-                  CustomMenuButton(label: "Deposito", icon: Icons.savings, onPressed: () {}),
-                  CustomMenuButton(label: "Pembayaran", icon: Icons.payment, onPressed: () {}),
-                  CustomMenuButton(label: "Pinjaman", icon: Icons.attach_money, onPressed: () {}),
-                  CustomMenuButton(label: "Mutasi", icon: Icons.receipt_long, onPressed: () {}),
+                  CustomMenuButton(
+                    label: "Saldo",
+                    icon: Icons.account_balance_wallet,
+                    onPressed: () {
+                      Navigator.pushReplacementNamed(context, '/saldo');
+                    },
+                  ),
+                  CustomMenuButton(
+                    label: "Transfer",
+                    icon: Icons.send,
+                    onPressed: () {
+                      Navigator.pushReplacementNamed(context, '/transfer');
+                    },
+                  ),
+                  CustomMenuButton(
+                    label: "Deposito",
+                    icon: Icons.savings,
+                    onPressed: () {
+                      Navigator.pushReplacementNamed(context, '/deposito');
+                    },
+                  ),
+                  CustomMenuButton(
+                    label: "Pembayaran",
+                    icon: Icons.payment,
+                    onPressed: () {
+                      Navigator.pushReplacementNamed(context, '/pembayaran');
+                    },
+                  ),
+                  CustomMenuButton(
+                    label: "Pinjaman",
+                    icon: Icons.attach_money,
+                    onPressed: () {
+                      Navigator.pushReplacementNamed(context, '/pinjaman');
+                    },
+                  ),
+                  CustomMenuButton(
+                    label: "Mutasi",
+                    icon: Icons.receipt_long,
+                    onPressed: () {
+                      Navigator.pushReplacementNamed(context, '/mutasi');
+                    },
+                  ),
                 ],
               ),
             ),
-
-            SizedBox(height: 12),
-
+            const SizedBox(height: 12),
             Container(
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.blue.shade50,
+                color: const Color(0xFFE3F2FD), 
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.blue.shade100, width: 1),
+                border: Border.all(
+                  color: const Color(0xFFBBDEFB), 
+                  width: 1,
+                ),
               ),
               child: Row(
                 children: [
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("Butuh Bantuan?", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      children: const [
+                        Text(
+                          "Butuh Bantuan?",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
                         SizedBox(height: 2),
-                        Text("0878-1234-1024", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                        Text(
+                          "0878-1234-1024",
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                  IconButton(icon: Icon(Icons.phone, size: 50, color: Colors.blue.shade900), onPressed: () {}),
+                  IconButton(
+                    icon: const Icon(Icons.phone, size: 50, color: AppColors.primary),
+                    onPressed: () {},
+                  ),
                 ],
               ),
             ),
           ],
         ),
       ),
-
       bottomNavigationBar: BottomNavBar(
         selectedIndex: _selectedIndex,
         onTap: _onNavItemTapped,

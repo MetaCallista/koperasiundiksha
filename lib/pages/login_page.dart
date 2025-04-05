@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'home_page.dart';
 import '../widgets/custom_textfield.dart';
+import '../widgets/app_colors.dart';
 
 class LoginPage extends StatelessWidget {
   final TextEditingController usernameController = TextEditingController();
@@ -9,65 +10,63 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       body: Column(
         children: [
-        
           Container(
             width: double.infinity,
-            padding: EdgeInsets.symmetric(vertical: 15),
-            color: Colors.blue.shade900,
-            child: Center(
+            padding: const EdgeInsets.symmetric(vertical: 15),
+            color: AppColors.primary,
+            child: const Center(
               child: Text(
                 "Koperasi Undiksha",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.background,
+                ),
               ),
             ),
           ),
-          
-        
-          SizedBox(height: 20),
-          Image.asset('assets/logo.png', width: 140), 
-          SizedBox(height: 20),
 
-         
+          const SizedBox(height: 20),
+          Image.asset('assets/logo.png', width: 140),
+          const SizedBox(height: 20),
+
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Container(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.blue.shade900, width: 2),
+                border: Border.all(color: AppColors.primary, width: 2),
               ),
               child: Column(
                 children: [
                   CustomTextField(label: "Username", controller: usernameController),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   CustomTextField(label: "Password", controller: passwordController, isPassword: true),
-                  SizedBox(height: 15),
+                  const SizedBox(height: 15),
                   ElevatedButton(
                     onPressed: () {
-                      // Validasi login
                       if (usernameController.text == "2315091004") {
-                        // Kondisi jika benar, maka masuk ke halaman homepage
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(builder: (context) => HomePage()),
                         );
                       } else {
-                        // Jika salah, menampilkan pesan peringatan
                         showDialog(
                           context: context,
                           builder: (context) {
                             return AlertDialog(
-                              title: Text("Login Gagal"),
-                              content: Text("Username salah! Silakan coba lagi."),
+                              title: const Text("Login Gagal"),
+                              content: const Text("Username salah! Silakan coba lagi."),
                               actions: [
                                 TextButton(
                                   onPressed: () {
                                     Navigator.pop(context);
                                   },
-                                  child: Text("OK"),
+                                  child: const Text("OK"),
                                 ),
                               ],
                             );
@@ -76,25 +75,36 @@ class LoginPage extends StatelessWidget {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue.shade900,
-                      padding: EdgeInsets.symmetric(vertical: 14, horizontal: 60),
+                      backgroundColor: AppColors.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 60),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                     ),
-                    child: Text("Login", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                    child: const Text(
+                      "Login",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.background,
+                      ),
+                    ),
                   ),
-
-                  // Link "Daftar Mbanking" dan "Lupa Password?" dimasukkan ke dalam Card
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       TextButton(
                         onPressed: () {},
-                        child: Text("Daftar Mbanking", style: TextStyle(color: Colors.blue.shade900, fontSize: 14, fontWeight: FontWeight.bold)),
+                        child: const Text(
+                          "Daftar Mbanking",
+                          style: TextStyle(color: AppColors.primary, fontSize: 14, fontWeight: FontWeight.bold),
+                        ),
                       ),
                       TextButton(
                         onPressed: () {},
-                        child: Text("Lupa password?", style: TextStyle(color: Colors.blue.shade900, fontSize: 14, fontWeight: FontWeight.bold)),
+                        child: const Text(
+                          "Lupa password?",
+                          style: TextStyle(color: AppColors.primary, fontSize: 14, fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ],
                   ),
@@ -103,17 +113,16 @@ class LoginPage extends StatelessWidget {
             ),
           ),
 
-          Spacer(),
+          const Spacer(),
 
-          // Footer dengan copyright
           Container(
             width: double.infinity,
-            padding: EdgeInsets.symmetric(vertical: 10),
-            color: Colors.grey.shade300,
-            child: Center(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            color: AppColors.border,
+            child: const Center(
               child: Text(
                 "copyright @2022 by Undiksha",
-                style: TextStyle(color: Colors.black87, fontSize: 14),
+                style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
               ),
             ),
           ),
