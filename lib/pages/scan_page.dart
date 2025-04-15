@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
-import '../widgets/app_colors.dart'; // Pastikan path sesuai struktur project kamu
+import '../widgets/app_colors.dart'; 
 
 class ScanPage extends StatefulWidget {
   @override

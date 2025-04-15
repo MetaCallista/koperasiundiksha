@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:koperasi_undiksha/balance_state.dart';
+import '../widgets/app_colors.dart';
 import 'home_page.dart';
-import '../widgets/app_colors.dart'; // Ganti path jika berbeda
 
 class SaldoPage extends StatefulWidget {
   @override
@@ -8,13 +9,13 @@ class SaldoPage extends StatefulWidget {
 }
 
 class _SaldoPageState extends State<SaldoPage> {
-  double saldoSaatIni = 1200000;
   double totalPemasukan = 2050000;
   double totalPengeluaran = 850000;
 
   void _refreshSaldo() {
+    // Tambah saldo dan update ValueListenable
+    BalanceState.saldo.value += 50000;
     setState(() {
-      saldoSaatIni += 50000;
       totalPemasukan += 50000;
     });
   }
@@ -45,10 +46,18 @@ class _SaldoPageState extends State<SaldoPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SaldoCard(saldoSaatIni: saldoSaatIni, onRefresh: _refreshSaldo),
+            // Gunakan ValueListenableBuilder agar real-time dengan homepage
+            ValueListenableBuilder<int>(
+              valueListenable: BalanceState.saldo,
+              builder: (context, saldo, _) {
+                return SaldoCard(
+                  saldoSaatIni: saldo.toDouble(),
+                  onRefresh: _refreshSaldo,
+                );
+              },
+            ),
             const SizedBox(height: 20),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 StatistikCard(
                   title: "Total Pemasukan",
@@ -73,7 +82,10 @@ class SaldoCard extends StatelessWidget {
   final double saldoSaatIni;
   final VoidCallback onRefresh;
 
-  const SaldoCard({required this.saldoSaatIni, required this.onRefresh});
+  const SaldoCard({
+    required this.saldoSaatIni,
+    required this.onRefresh,
+  });
 
   @override
   Widget build(BuildContext context) {

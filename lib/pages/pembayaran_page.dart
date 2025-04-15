@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:koperasi_undiksha/balance_state.dart';
 import 'home_page.dart';
-import '../widgets/app_colors.dart'; 
+import '../widgets/app_colors.dart';
+ // Import file BalanceState
 
 class PembayaranPage extends StatefulWidget {
   const PembayaranPage({Key? key}) : super(key: key);
@@ -28,6 +30,16 @@ class _PembayaranPageState extends State<PembayaranPage> {
   ];
 
   void _showSuccessNotification() {
+    // Mengubah format nominal ke integer
+    final nominal = int.tryParse(nominalController.text.replaceAll('.', '')) ?? 0;
+
+    if (nominal <= 0) {
+      return; // Pastikan nominal valid
+    }
+
+    // Update saldo dengan mengurangi nominal
+    BalanceState.saldo.value -= nominal; 
+
     showDialog(
       context: context,
       builder: (context) {
@@ -117,7 +129,6 @@ class _PembayaranPageState extends State<PembayaranPage> {
             const SizedBox(height: 5),
             TextFormField(
               controller: nominalController,
-              readOnly: true,
               decoration: const InputDecoration(
                 filled: true,
                 fillColor: AppColors.background,

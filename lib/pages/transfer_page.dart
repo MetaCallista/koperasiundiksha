@@ -1,24 +1,31 @@
 import 'package:flutter/material.dart';
 import '../widgets/app_colors.dart';
+import '../balance_state.dart';
+import 'home_page.dart';
 
 class TransferPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text(
           "Transfer Uang",
-          style: TextStyle(color: AppColors.textPrimary),
+          style: TextStyle(color: Colors.white),
         ),
         backgroundColor: AppColors.primary,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => Navigator.pushReplacementNamed(context, '/home'),
+          icon: const Icon(Icons.arrow_back, color: AppColors.background),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => HomePage()),
+            );
+          },
         ),
       ),
       body: const TransferForm(),
-      backgroundColor: AppColors.background,
     );
   }
 }
@@ -38,12 +45,27 @@ class _TransferFormState extends State<TransferForm> {
   final List<String> daftarBank = ["Bank Mandiri", "Bank BRI", "Bank BNI", "Bank BCA"];
 
   void _konfirmasiTransfer() {
-    String rekening = rekeningController.text;
-    String jumlah = jumlahController.text;
+    String rekening = rekeningController.text.trim();
+    String jumlah = jumlahController.text.trim();
 
     if (rekening.isEmpty || jumlah.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Harap isi semua kolom!")),
+      );
+      return;
+    }
+
+    int jumlahInt = int.tryParse(jumlah) ?? 0;
+    if (jumlahInt <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Jumlah transfer tidak valid!")),
+      );
+      return;
+    }
+
+    if (jumlahInt > BalanceState.saldo.value) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Saldo tidak mencukupi untuk transfer!")),
       );
       return;
     }
@@ -53,8 +75,23 @@ class _TransferFormState extends State<TransferForm> {
       builder: (context) {
         return TransferConfirmationDialog(
           rekening: rekening,
-          jumlah: jumlah,
+          jumlah: jumlahInt,
           bank: selectedBank,
+          onConfirm: () {
+            // Kurangi saldo
+            BalanceState.saldo.value -= jumlahInt;
+
+            // Tampilkan notifikasi
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Transfer berhasil dikirim!")),
+            );
+
+            // Kembali ke halaman utama
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => HomePage()),
+            );
+          },
         );
       },
     );
@@ -142,13 +179,15 @@ class _TransferFormState extends State<TransferForm> {
 
 class TransferConfirmationDialog extends StatelessWidget {
   final String rekening;
-  final String jumlah;
+  final int jumlah;
   final String bank;
+  final VoidCallback onConfirm;
 
   const TransferConfirmationDialog({
     required this.rekening,
     required this.jumlah,
     required this.bank,
+    required this.onConfirm,
     Key? key,
   }) : super(key: key);
 
@@ -167,10 +206,8 @@ class TransferConfirmationDialog extends StatelessWidget {
         ),
         ElevatedButton(
           onPressed: () {
-            Navigator.pop(context);
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Transfer berhasil dikirim!")),
-            );
+            Navigator.pop(context); // Tutup dialog
+            onConfirm(); // Jalankan aksi konfirmasi
           },
           style: ElevatedButton.styleFrom(backgroundColor: AppColors.income),
           child: const Text("Kirim"),

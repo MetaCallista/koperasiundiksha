@@ -17,17 +17,17 @@ class CustomMenuButton extends StatelessWidget {
     return GestureDetector(
       onTap: onPressed,
       child: Container(
-        width: 90,
-        padding: EdgeInsets.symmetric(vertical: 12),
+        width: double.infinity, // Biar menyesuaikan lebar parent Grid
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
         decoration: BoxDecoration(
-          color: Colors.grey.shade300, 
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.grey.shade400, width: 1),
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade300, width: 1),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              blurRadius: 4,
-              offset: Offset(0, 2),
+              color: Colors.grey.withOpacity(0.15),
+              blurRadius: 6,
+              offset: const Offset(0, 3),
             ),
           ],
         ),
@@ -36,17 +36,17 @@ class CustomMenuButton extends StatelessWidget {
           children: [
             Icon(
               icon,
-              size: 50,
-              color: Colors.blue, 
+              size: 36,
+              color: Colors.blue.shade700,
             ),
-            SizedBox(height: 6),
+            const SizedBox(height: 8),
             Text(
               label,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-                color: Colors.black, 
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
               ),
             ),
           ],

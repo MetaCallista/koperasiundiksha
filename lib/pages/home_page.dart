@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:koperasi_undiksha/balance_state.dart';
 import '../widgets/profile_card.dart';
 import '../widgets/custom_menu_button.dart';
 import '../widgets/bottom_navbar.dart';
@@ -16,6 +17,21 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  Widget _buildMenu(String label, IconData icon, String route) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: CustomMenuButton(
+          label: label,
+          icon: icon,
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, route);
+          },
+        ),
+      ),
+    );
   }
 
   @override
@@ -48,12 +64,20 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const ProfileCard(
-              name: "Putu Meta Callista",
-              balance: "Rp. 1.200.000",
-              imagePath: 'assets/profile.jpg',
+            // Kartu profil dan saldo dinamis
+            ValueListenableBuilder<int>(
+              valueListenable: BalanceState.saldo,
+              builder: (context, saldo, _) {
+                return ProfileCard(
+                  name: "Putu Meta Callista",
+                  balance: 'Rp. $saldo',
+                  imagePath: 'assets/profile.jpg',
+                );
+              },
             ),
             const SizedBox(height: 10),
+
+            // Menu utama
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
@@ -68,69 +92,39 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ],
               ),
-              child: GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 3,
-                mainAxisSpacing: 8,
-                crossAxisSpacing: 8,
-                childAspectRatio: 1.1,
+              child: Column(
                 children: [
-                  CustomMenuButton(
-                    label: "Saldo",
-                    icon: Icons.account_balance_wallet,
-                    onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/saldo');
-                    },
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildMenu("Saldo", Icons.account_balance_wallet, '/saldo'),
+                      _buildMenu("Transfer", Icons.send, '/transfer'),
+                      _buildMenu("Deposito", Icons.savings, '/deposito'),
+                      _buildMenu("Mutasi", Icons.receipt_long, '/mutasi'),
+                    ],
                   ),
-                  CustomMenuButton(
-                    label: "Transfer",
-                    icon: Icons.send,
-                    onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/transfer');
-                    },
-                  ),
-                  CustomMenuButton(
-                    label: "Deposito",
-                    icon: Icons.savings,
-                    onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/deposito');
-                    },
-                  ),
-                  CustomMenuButton(
-                    label: "Pembayaran",
-                    icon: Icons.payment,
-                    onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/pembayaran');
-                    },
-                  ),
-                  CustomMenuButton(
-                    label: "Pinjaman",
-                    icon: Icons.attach_money,
-                    onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/pinjaman');
-                    },
-                  ),
-                  CustomMenuButton(
-                    label: "Mutasi",
-                    icon: Icons.receipt_long,
-                    onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/mutasi');
-                    },
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildMenu("Pinjaman", Icons.attach_money, '/pinjaman'),
+                      _buildMenu("Pembayaran", Icons.payment, '/pembayaran'),
+                      _buildMenu("Tarik Tunai", Icons.money, '/tariktunai'),
+                    ],
                   ),
                 ],
               ),
             ),
+
             const SizedBox(height: 12),
+
+            // Info bantuan
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: const Color(0xFFE3F2FD), 
+                color: const Color(0xFFE3F2FD),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: const Color(0xFFBBDEFB), 
-                  width: 1,
-                ),
+                border: Border.all(color: const Color(0xFFBBDEFB), width: 1),
               ),
               child: Row(
                 children: [
@@ -160,7 +154,9 @@ class _HomePageState extends State<HomePage> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.phone, size: 50, color: AppColors.primary),
-                    onPressed: () {},
+                    onPressed: () {
+                      // Aksi saat ditekan bisa ditambahkan di sini
+                    },
                   ),
                 ],
               ),
