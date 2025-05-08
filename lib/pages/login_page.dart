@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'home_page.dart';
+import '../providers/user_provider.dart';
 import '../widgets/app_colors.dart';
 
 class LoginPage extends StatefulWidget {
@@ -13,6 +17,58 @@ class _LoginPageState extends State<LoginPage> {
 
   bool _isPasswordVisible = false;
   String _errorMessage = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  // Cek apakah user sudah login
+  Future<void> _checkLoginStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool? isLoggedIn = prefs.getBool('isLoggedIn');
+
+    if (isLoggedIn == true) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()),
+      );
+    }
+  }
+
+  // Simpan status login dan username
+  Future<void> _saveLoginData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', true);
+    await prefs.setString('username', usernameController.text);
+  }
+
+  // Handle login
+  void _handleLogin() async {
+    String username = usernameController.text;
+    String password = passwordController.text;
+
+    setState(() {
+      _errorMessage = '';
+    });
+
+    if (username == '2315091004' && password == '2315091004') {
+      await _saveLoginData();
+
+      // Set ke Provider
+      Provider.of<UserProvider>(context, listen: false).setUsername(username);
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()),
+      );
+    } else {
+      setState(() {
+        _errorMessage = 'Username atau password salah! Silakan coba lagi.';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +108,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
               child: Column(
                 children: [
-                  // Username Field with rounded border
                   TextField(
                     controller: usernameController,
                     decoration: InputDecoration(
@@ -63,8 +118,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   const SizedBox(height: 10),
-
-                  // Password Field with same rounded border
                   TextField(
                     controller: passwordController,
                     obscureText: !_isPasswordVisible,
@@ -90,7 +143,6 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 10),
 
-                  // Error message
                   if (_errorMessage.isNotEmpty)
                     Text(
                       _errorMessage,
@@ -99,23 +151,7 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 15),
                   ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        if (usernameController.text == "2315091004" &&
-                            passwordController.text == "2315091004") {
-                          _errorMessage = '';
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => HomePage(),
-                            ),
-                          );
-                        } else {
-                          _errorMessage =
-                              "Username atau password salah! Silakan coba lagi.";
-                        }
-                      });
-                    },
+                    onPressed: _handleLogin,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       padding: const EdgeInsets.symmetric(

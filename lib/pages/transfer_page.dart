@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../widgets/app_colors.dart';
-import '../balance_state.dart';
 import 'home_page.dart';
+import '../providers/balance_provider.dart';
+import '../providers/mutasi_provider.dart'; // ✅ Tambahkan ini
 
 class TransferPage extends StatelessWidget {
   @override
@@ -55,15 +57,17 @@ class _TransferFormState extends State<TransferForm> {
       return;
     }
 
-    int jumlahInt = int.tryParse(jumlah) ?? 0;
-    if (jumlahInt <= 0) {
+    double jumlahDouble = double.tryParse(jumlah) ?? 0;
+    if (jumlahDouble <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Jumlah transfer tidak valid!")),
       );
       return;
     }
 
-    if (jumlahInt > BalanceState.saldo.value) {
+    double currentSaldo = Provider.of<BalanceProvider>(context, listen: false).saldo;
+
+    if (jumlahDouble > currentSaldo) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Saldo tidak mencukupi untuk transfer!")),
       );
@@ -75,18 +79,24 @@ class _TransferFormState extends State<TransferForm> {
       builder: (context) {
         return TransferConfirmationDialog(
           rekening: rekening,
-          jumlah: jumlahInt,
+          jumlah: jumlahDouble,
           bank: selectedBank,
           onConfirm: () {
-            // Kurangi saldo
-            BalanceState.saldo.value -= jumlahInt;
+            // ✅ Kurangi saldo
+            Provider.of<BalanceProvider>(context, listen: false).kurangiSaldo(jumlahDouble);
 
-            // Tampilkan notifikasi
+            // ✅ Tambahkan ke mutasi
+            Provider.of<MutasiProvider>(context, listen: false).tambahMutasi(
+              'Pengeluaran',
+              'Transfer ke $rekening ($selectedBank)',
+              jumlahDouble,
+              DateTime.now().toIso8601String().substring(0, 10),
+            );
+
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("Transfer berhasil dikirim!")),
             );
 
-            // Kembali ke halaman utama
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => HomePage()),
@@ -119,7 +129,6 @@ class _TransferFormState extends State<TransferForm> {
             ),
           ),
           const SizedBox(height: 16),
-
           const Text(
             "Bank Tujuan",
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
@@ -140,7 +149,6 @@ class _TransferFormState extends State<TransferForm> {
             ),
           ),
           const SizedBox(height: 16),
-
           const Text(
             "Jumlah Transfer",
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
@@ -149,14 +157,13 @@ class _TransferFormState extends State<TransferForm> {
             controller: jumlahController,
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(
-              hintText: "Masukkan jumlah transfer",
+              hintText: "Contoh : 1000000",
               hintStyle: TextStyle(color: AppColors.textSecondary),
               border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.border)),
               prefixIcon: Icon(Icons.money, color: AppColors.primary),
             ),
           ),
           const SizedBox(height: 20),
-
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
@@ -179,7 +186,7 @@ class _TransferFormState extends State<TransferForm> {
 
 class TransferConfirmationDialog extends StatelessWidget {
   final String rekening;
-  final int jumlah;
+  final double jumlah;
   final String bank;
   final VoidCallback onConfirm;
 
@@ -196,7 +203,7 @@ class TransferConfirmationDialog extends StatelessWidget {
     return AlertDialog(
       title: const Text("Konfirmasi Transfer", style: TextStyle(color: AppColors.textPrimary)),
       content: Text(
-        "Anda akan mentransfer Rp. $jumlah ke rekening $rekening di $bank.",
+        "Anda akan mentransfer Rp. ${jumlah.toStringAsFixed(0)} ke rekening $rekening di $bank.",
         style: const TextStyle(color: AppColors.textSecondary),
       ),
       actions: [

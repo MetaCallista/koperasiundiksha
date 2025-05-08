@@ -1,27 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:koperasi_undiksha/balance_state.dart';
+import 'package:koperasi_undiksha/pages/home_page.dart';
+import 'package:koperasi_undiksha/providers/balance_provider.dart';
+import 'package:provider/provider.dart';
 import '../widgets/app_colors.dart';
-import 'home_page.dart';
 
-class SaldoPage extends StatefulWidget {
-  @override
-  _SaldoPageState createState() => _SaldoPageState();
-}
-
-class _SaldoPageState extends State<SaldoPage> {
-  double totalPemasukan = 2050000;
-  double totalPengeluaran = 850000;
-
-  void _refreshSaldo() {
-    // Tambah saldo dan update ValueListenable
-    BalanceState.saldo.value += 50000;
-    setState(() {
-      totalPemasukan += 50000;
-    });
-  }
-
+class SaldoPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final balance = Provider.of<BalanceProvider>(context);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -46,27 +33,21 @@ class _SaldoPageState extends State<SaldoPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Gunakan ValueListenableBuilder agar real-time dengan homepage
-            ValueListenableBuilder<int>(
-              valueListenable: BalanceState.saldo,
-              builder: (context, saldo, _) {
-                return SaldoCard(
-                  saldoSaatIni: saldo.toDouble(),
-                  onRefresh: _refreshSaldo,
-                );
-              },
+            SaldoCard(
+              saldoSaatIni: balance.saldo,
+              onRefresh: () => balance.tambahSaldo(50000),
             ),
             const SizedBox(height: 20),
             Row(
               children: [
                 StatistikCard(
                   title: "Total Pemasukan",
-                  amount: totalPemasukan,
+                  amount: balance.totalPemasukan,
                   color: AppColors.income,
                 ),
                 StatistikCard(
                   title: "Total Pengeluaran",
-                  amount: totalPengeluaran,
+                  amount: balance.totalPengeluaran,
                   color: AppColors.expense,
                 ),
               ],

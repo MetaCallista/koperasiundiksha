@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:koperasi_undiksha/balance_state.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../providers/user_provider.dart';
+import '../providers/balance_provider.dart'; // Tambahkan import BalanceProvider
 import '../widgets/profile_card.dart';
 import '../widgets/custom_menu_button.dart';
 import '../widgets/bottom_navbar.dart';
@@ -34,8 +37,20 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Future<void> _logout(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', false);
+    await prefs.remove('username');
+
+    Provider.of<UserProvider>(context, listen: false).clearUser();
+    Navigator.pushReplacementNamed(context, '/login');
+  }
+
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final username = userProvider.username;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -53,9 +68,7 @@ class _HomePageState extends State<HomePage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: () {
-              Navigator.pushReplacementNamed(context, '/login');
-            },
+            onPressed: () => _logout(context),
           ),
         ],
       ),
@@ -64,20 +77,18 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Kartu profil dan saldo dinamis
-            ValueListenableBuilder<int>(
-              valueListenable: BalanceState.saldo,
-              builder: (context, saldo, _) {
+            Consumer<BalanceProvider>(
+              builder: (context, balanceProvider, _) {
                 return ProfileCard(
-                  name: "Putu Meta Callista",
-                  balance: 'Rp. $saldo',
+                  name: username.isNotEmpty ? username : 'Putu Meta Callista',
+                  balance: 'Rp. ${balanceProvider.saldo}',
                   imagePath: 'assets/profile.jpg',
                 );
               },
             ),
             const SizedBox(height: 10),
 
-            // Menu utama
+            // Menu Utama
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
@@ -115,10 +126,9 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-
             const SizedBox(height: 12),
 
-            // Info bantuan
+            // Info Bantuan
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
@@ -155,7 +165,7 @@ class _HomePageState extends State<HomePage> {
                   IconButton(
                     icon: const Icon(Icons.phone, size: 50, color: AppColors.primary),
                     onPressed: () {
-                      // Aksi saat ditekan bisa ditambahkan di sini
+                      // Tambahkan aksi jika dibutuhkan
                     },
                   ),
                 ],

@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-// Import semua halaman
+// Providers
+import 'providers/user_provider.dart';
+import 'providers/balance_provider.dart'; // Harus tetap diimpor
+import 'providers/deposito_provider.dart'; // Tambahkan ini
+import 'providers/mutasi_provider.dart';
+
+// Pages
 import 'pages/login_page.dart';
 import 'pages/home_page.dart';
 import 'pages/saldo_page.dart';
@@ -15,10 +22,22 @@ import 'pages/setting_page.dart';
 import 'pages/profile_page.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => BalanceProvider()), // Wajib disediakan
+        ChangeNotifierProvider(create: (_) => DepositoProvider()), // Tambahkan ini
+        ChangeNotifierProvider(create: (_) => MutasiProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -30,15 +49,10 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/login',
       routes: {
-        // Auth
         '/login': (context) => LoginPage(),
-
-        // Main Pages
         '/home': (context) => HomePage(),
         '/profile': (context) => ProfilePage(),
         '/settings': (context) => SettingPage(),
-
-        // Fitur Keuangan
         '/saldo': (context) => SaldoPage(),
         '/transfer': (context) => TransferPage(),
         '/deposito': (context) => DepositoPage(),
@@ -46,8 +60,6 @@ class MyApp extends StatelessWidget {
         '/pinjaman': (context) => PinjamanPage(),
         '/pembayaran': (context) => PembayaranPage(),
         '/tariktunai': (context) => TarikTunaiPage(),
-
-        // Fitur Tambahan
         '/scan': (context) => ScanPage(),
       },
     );

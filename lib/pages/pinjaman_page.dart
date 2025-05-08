@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'home_page.dart';
-import '../widgets/app_colors.dart'; 
+import 'package:koperasi_undiksha/pages/home_page.dart';
+import 'package:koperasi_undiksha/widgets/app_colors.dart';
+import 'package:provider/provider.dart';
+import '../providers/balance_provider.dart';
+import '../providers/mutasi_provider.dart';  // Import MutasiProvider
 
 class PinjamanPage extends StatefulWidget {
   const PinjamanPage({super.key});
@@ -25,6 +28,33 @@ class _PinjamanPageState extends State<PinjamanPage> {
     if (selectedJenisPinjaman != null &&
         nominalController.text.isNotEmpty &&
         durasiController.text.isNotEmpty) {
+      // Parsing the nominal pinjaman (loan amount)
+      final nominal = int.tryParse(nominalController.text.replaceAll('.', '')) ?? 0;
+
+      // Check if the loan amount is valid
+      if (nominal <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Nominal pinjaman tidak valid!")),
+        );
+        return;
+      }
+
+      // Get the current balance using BalanceProvider
+      final balanceProvider = Provider.of<BalanceProvider>(context, listen: false);
+
+      // Add the loan amount to the current balance using BalanceProvider
+      balanceProvider.tambahSaldo(nominal.toDouble());
+
+      // Menambahkan mutasi pinjaman
+      final mutasiProvider = Provider.of<MutasiProvider>(context, listen: false);
+      mutasiProvider.tambahMutasi(
+        'Pemasukan', // Tipe mutasi
+        'Pinjaman: ${selectedJenisPinjaman}', // Deskripsi mutasi
+        nominal.toDouble(), // Nominal mutasi
+        DateTime.now().toString(), // Tanggal mutasi
+      );
+
+      // Show success message
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -32,7 +62,13 @@ class _PinjamanPageState extends State<PinjamanPage> {
           content: const Text("Pengajuan pinjaman Anda telah berhasil dikirim."),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => HomePage()),
+                );
+              },
               child: const Text("OK"),
             ),
           ],
@@ -111,7 +147,7 @@ class _PinjamanPageState extends State<PinjamanPage> {
               controller: nominalController,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(
-                hintText: "Contoh: 5.000.000",
+                hintText: "Contoh: 5000000",
                 filled: true,
                 fillColor: AppColors.background,
                 border: OutlineInputBorder(

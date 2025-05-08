@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:koperasi_undiksha/balance_state.dart';
+import 'package:koperasi_undiksha/providers/balance_provider.dart';
+import 'package:koperasi_undiksha/providers/mutasi_provider.dart'; // Tambahkan import ini
+import 'package:provider/provider.dart';
 import 'home_page.dart';
 import '../widgets/app_colors.dart';
- // Import file BalanceState
 
 class PembayaranPage extends StatefulWidget {
   const PembayaranPage({Key? key}) : super(key: key);
@@ -12,9 +13,11 @@ class PembayaranPage extends StatefulWidget {
 }
 
 class _PembayaranPageState extends State<PembayaranPage> {
-  String? jenisPembayaran = 'Iuran Bulanan';
-  String? metodePembayaran = 'QRIS';
-  final nominalController = TextEditingController(text: '1.000.000');
+  String? jenisPembayaran;
+  String? metodePembayaran;
+  String? nomorRekening;
+  String? bank;
+  final nominalController = TextEditingController();
 
   final List<String> jenisPembayaranList = [
     'Iuran Bulanan',
@@ -24,36 +27,98 @@ class _PembayaranPageState extends State<PembayaranPage> {
   ];
 
   final List<String> metodePembayaranList = [
-    'QRIS',
-    'Transfer Bank',
-    'Tunai',
+    'BI Fast',
+    'Saldo Koperasi',
+    'Transfer Online',
+    'Dompet Digital',
   ];
 
+  final List<String> bankList = [
+    'Bank BCA',
+    'Bank Mandiri',
+    'Bank BRI',
+    'Bank BTN',
+    // Tambahkan bank lainnya jika perlu
+  ];
+
+  String getDeskripsiMetodePembayaran(String? metode) {
+    switch (metode) {
+      case 'Saldo Koperasi':
+        return 'Waktu pembayaran cepat, biasanya hanya beberapa menit, dengan biaya admin Rp 2.500,- per transaksi.';
+      case 'BI Fast':
+        return 'Waktu pembayaran cepat, biasanya hanya beberapa menit, dengan biaya admin Rp 6.500,- per transaksi.';
+      case 'Transfer Online':
+        return 'Pembayaran melalui transfer bank biasa yang dapat memakan waktu beberapa jam, biaya admin Rp 10.000,-.';
+      case 'Dompet Digital':
+        return 'Pembayaran melalui dompet digital seperti OVO, GoPay, atau Dana dengan biaya admin rendah atau tanpa biaya.';
+      default:
+        return '';
+    }
+  }
+
   void _showSuccessNotification() {
-    // Mengubah format nominal ke integer
     final nominal = int.tryParse(nominalController.text.replaceAll('.', '')) ?? 0;
 
+    // Pastikan nominal valid
     if (nominal <= 0) {
-      return; // Pastikan nominal valid
+      return;
     }
 
-    // Update saldo dengan mengurangi nominal
-    BalanceState.saldo.value -= nominal; 
+    // Ambil saldo dari Provider
+    final balanceProvider = Provider.of<BalanceProvider>(context, listen: false);
 
+    // Cek apakah saldo mencukupi
+    if (balanceProvider.saldo < nominal) {
+      _showErrorNotification();
+    } else {
+      // Jika saldo cukup, proses pembayaran
+      balanceProvider.kurangiSaldo(nominal.toDouble()); // Mengurangi saldo dengan menggunakan metode dari BalanceProvider
+
+      // Menambahkan mutasi pengeluaran ke MutasiProvider
+      final mutasiProvider = Provider.of<MutasiProvider>(context, listen: false);
+      mutasiProvider.tambahMutasi(
+        'pengeluaran',       // Tipe transaksi adalah pengeluaran
+        jenisPembayaran ?? '',  // Deskripsi pembayaran
+        nominal.toDouble(),    // Nominal pengeluaran
+        DateTime.now().toString(), // Tanggal transaksi
+      );
+
+      // Tampilkan notifikasi pembayaran berhasil
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Pembayaran Berhasil'),
+            content: const Text('Terima kasih, pembayaran Anda telah diproses.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => HomePage()),
+                  );
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  void _showErrorNotification() {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Pembayaran Berhasil'),
-          content: const Text('Terima kasih, pembayaran Anda telah diproses.'),
+          title: const Text('Pembayaran Gagal'),
+          content: const Text('Saldo Anda tidak mencukupi untuk melakukan pembayaran.'),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => HomePage()),
-                );
               },
               child: const Text('OK'),
             ),
@@ -61,6 +126,12 @@ class _PembayaranPageState extends State<PembayaranPage> {
         );
       },
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    nominalController.clear(); // Mengosongkan controller saat halaman pertama kali dibuka
   }
 
   @override
@@ -99,6 +170,10 @@ class _PembayaranPageState extends State<PembayaranPage> {
             const SizedBox(height: 5),
             DropdownButtonFormField<String>(
               value: jenisPembayaran,
+              hint: const Text(
+                "Pilih Jenis Pembayaran",
+                style: TextStyle(color: Colors.grey), // Ukuran huruf kecil
+              ),
               items: jenisPembayaranList.map((jenis) {
                 return DropdownMenuItem(
                   value: jenis,
@@ -135,6 +210,8 @@ class _PembayaranPageState extends State<PembayaranPage> {
                 border: OutlineInputBorder(
                   borderSide: BorderSide(color: AppColors.border),
                 ),
+                hintText: "Contoh : 1000000",
+                hintStyle: TextStyle(color: Colors.grey), // Hint text abu dan ukuran kecil
               ),
             ),
             const SizedBox(height: 20),
@@ -148,6 +225,10 @@ class _PembayaranPageState extends State<PembayaranPage> {
             const SizedBox(height: 5),
             DropdownButtonFormField<String>(
               value: metodePembayaran,
+              hint: const Text(
+                "Pilih Metode Pembayaran",
+                style: TextStyle(color: Colors.grey), // Ukuran huruf kecil
+              ),
               items: metodePembayaranList.map((metode) {
                 return DropdownMenuItem(
                   value: metode,
@@ -167,13 +248,27 @@ class _PembayaranPageState extends State<PembayaranPage> {
                 ),
               ),
             ),
+            const SizedBox(height: 10),
+            // Menambahkan deskripsi metode pembayaran
+            if (metodePembayaran != null) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10.0),
+                child: Text(
+                  getDeskripsiMetodePembayaran(metodePembayaran),
+                  style: const TextStyle(
+                    color: Colors.grey,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 30),
             Center(
               child: ElevatedButton.icon(
                 onPressed: _showSuccessNotification,
                 icon: const Icon(Icons.payment, color: AppColors.background),
                 label: const Text(
-                  'Bayar Sekarang',
+                  'Bayar',
                   style: TextStyle(color: AppColors.background),
                 ),
                 style: ElevatedButton.styleFrom(
@@ -182,7 +277,7 @@ class _PembayaranPageState extends State<PembayaranPage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
-                  elevation: 5, 
+                  elevation: 5,
                 ),
               ),
             ),

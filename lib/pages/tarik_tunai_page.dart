@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:koperasi_undiksha/balance_state.dart';
-import 'package:koperasi_undiksha/pages/home_page.dart';
+import 'package:provider/provider.dart';
+import '../providers/balance_provider.dart';
+import '../providers/mutasi_provider.dart'; // Import MutasiProvider
+import 'home_page.dart'; // assuming you have HomePage
 import '../widgets/app_colors.dart';
 
 class TarikTunaiPage extends StatefulWidget {
@@ -16,8 +18,7 @@ class _TarikTunaiPageState extends State<TarikTunaiPage> {
   String? _selectedJalurTarik;
 
   final List<String> sumberDanaOptions = [
-    'Tabungan',
-    'Simpanan Sukarela',
+    'Saldo Koperasi',
     'Deposito',
   ];
 
@@ -29,7 +30,7 @@ class _TarikTunaiPageState extends State<TarikTunaiPage> {
 
   void _tarikUang() {
     final jumlah = int.tryParse(_jumlahController.text);
-    final saldoSekarang = BalanceState.saldo.value;
+    final saldoSekarang = Provider.of<BalanceProvider>(context, listen: false).saldo;
 
     if (_selectedSumberDana == null || _selectedJalurTarik == null) {
       setState(() {
@@ -52,12 +53,20 @@ class _TarikTunaiPageState extends State<TarikTunaiPage> {
       return;
     }
 
-    // Update saldo global
-    BalanceState.saldo.value = saldoSekarang - jumlah;
+    // Use BalanceProvider to update the saldo
+    Provider.of<BalanceProvider>(context, listen: false).kurangiSaldo(jumlah.toDouble());
+
+    // Menambahkan transaksi ke MutasiProvider
+    Provider.of<MutasiProvider>(context, listen: false).tambahMutasi(
+      'pengeluaran', // Tipe pengeluaran karena ini penarikan
+      'Tarik Tunai dari $_selectedSumberDana melalui $_selectedJalurTarik',
+      jumlah.toDouble(),
+      DateTime.now().toString(), // Tanggal transaksi
+    );
 
     setState(() {
       _message =
-          "Penarikan sebesar Rp. $jumlah berhasil dari $_selectedSumberDana melalui $_selectedJalurTarik.\nSisa saldo: Rp. ${BalanceState.saldo.value}";
+          "Penarikan sebesar Rp. $jumlah berhasil dari $_selectedSumberDana melalui $_selectedJalurTarik.\nSisa saldo: Rp. ${Provider.of<BalanceProvider>(context, listen: false).saldo}";
       _jumlahController.clear();
       _selectedSumberDana = null;
       _selectedJalurTarik = null;
@@ -70,7 +79,7 @@ class _TarikTunaiPageState extends State<TarikTunaiPage> {
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.background),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pushReplacement(
               context,
@@ -123,19 +132,18 @@ class _TarikTunaiPageState extends State<TarikTunaiPage> {
                               "Saldo Anda",
                               style: TextStyle(
                                 fontSize: 16,
-                                color: AppColors.textPrimary,
+                                color: Colors.black,
                               ),
                             ),
                             const SizedBox(height: 4),
-                            ValueListenableBuilder<int>(
-                              valueListenable: BalanceState.saldo,
-                              builder: (context, saldo, _) {
+                            Consumer<BalanceProvider>(
+                              builder: (context, balanceProvider, _) {
                                 return Text(
-                                  "Rp. $saldo",
+                                  "Rp. ${balanceProvider.saldo}",
                                   style: const TextStyle(
                                     fontSize: 22,
                                     fontWeight: FontWeight.bold,
-                                    color: AppColors.textPrimary,
+                                    color: Colors.black,
                                   ),
                                 );
                               },
