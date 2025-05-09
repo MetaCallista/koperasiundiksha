@@ -1,53 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:koperasi_undiksha/pages/register_page.dart';
-import 'package:koperasi_undiksha/pages/reset_password_page.dart';
-import 'package:koperasi_undiksha/pages/home_page.dart';
 import '../providers/user_provider.dart';
 import '../widgets/app_colors.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   bool _isPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
   bool _isLoading = false;
   String _errorMessage = '';
-
-  @override
-  void initState() {
-    super.initState();
-    _checkLoginStatus();
-  }
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _checkLoginStatus() async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    await userProvider.loadUser();
-
-    if (userProvider.isLoggedIn && mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomePage()),
-      );
-    }
-  }
-
-  Future<void> _handleLogin() async {
+  Future<void> _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
@@ -57,13 +44,16 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
-      await userProvider.login(
+
+      await userProvider.register(
         username: _usernameController.text.trim(),
         password: _passwordController.text,
+        fullName: _nameController.text.trim(),
+        email: _emailController.text.trim(),
       );
 
       if (mounted) {
-        Navigator.pushReplacementNamed(context, '/home');
+        _showSuccessDialog();
       }
     } catch (e) {
       setState(() {
@@ -76,9 +66,34 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  String? _validateUsername(String? value) {
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder:
+          (_) => AlertDialog(
+            title: const Text("Pendaftaran Berhasil"),
+            content: const Text(
+              "Akun Anda telah berhasil dibuat. Silakan login.",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.popUntil(context, (route) => route.isFirst);
+                },
+                child: const Text("OK"),
+              ),
+            ],
+          ),
+    );
+  }
+
+  String? _validateEmail(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Username wajib diisi';
+      return 'Email wajib diisi';
+    }
+    if (!RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").hasMatch(value)) {
+      return 'Format email tidak valid';
     }
     return null;
   }
@@ -120,7 +135,7 @@ class _LoginPageState extends State<LoginPage> {
             Image.asset('assets/logo.png', width: 140),
             const SizedBox(height: 20),
 
-            // Login Form
+            // Register Form
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -134,6 +149,50 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     child: Column(
                       children: [
+                        TextFormField(
+                          controller: _nameController,
+                          decoration: InputDecoration(
+                            labelText: "Nama Lengkap",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: BorderSide(color: AppColors.primary),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: BorderSide(
+                                color: AppColors.primary,
+                                width: 2,
+                              ),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Nama lengkap wajib diisi';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            labelText: "Email",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: BorderSide(color: AppColors.primary),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: BorderSide(
+                                color: AppColors.primary,
+                                width: 2,
+                              ),
+                            ),
+                          ),
+                          validator: _validateEmail,
+                        ),
+                        const SizedBox(height: 12),
                         TextFormField(
                           controller: _usernameController,
                           decoration: InputDecoration(
@@ -150,7 +209,15 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ),
                           ),
-                          validator: _validateUsername,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Username wajib diisi';
+                            }
+                            if (value.length < 4) {
+                              return 'Username minimal 4 karakter';
+                            }
+                            return null;
+                          },
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
@@ -186,6 +253,45 @@ class _LoginPageState extends State<LoginPage> {
                           validator: _validatePassword,
                         ),
                         const SizedBox(height: 12),
+                        TextFormField(
+                          controller: _confirmPasswordController,
+                          obscureText: !_isConfirmPasswordVisible,
+                          decoration: InputDecoration(
+                            labelText: "Konfirmasi Password",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: BorderSide(color: AppColors.primary),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: BorderSide(
+                                color: AppColors.primary,
+                                width: 2,
+                              ),
+                            ),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _isConfirmPasswordVisible
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                color: AppColors.primary,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _isConfirmPasswordVisible =
+                                      !_isConfirmPasswordVisible;
+                                });
+                              },
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value != _passwordController.text) {
+                              return 'Password tidak sama';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 12),
 
                         if (_errorMessage.isNotEmpty)
                           Padding(
@@ -199,13 +305,13 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
 
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         _isLoading
                             ? const CircularProgressIndicator(
                               color: AppColors.primary,
                             )
                             : ElevatedButton(
-                              onPressed: _handleLogin,
+                              onPressed: _handleRegister,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primary,
                                 padding: const EdgeInsets.symmetric(
@@ -217,7 +323,7 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               ),
                               child: const Text(
-                                "Login",
+                                "Daftar",
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -226,46 +332,16 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ),
                         const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const RegisterPage(),
-                                  ),
-                                );
-                              },
-                              child: const Text(
-                                "Daftar Mbanking",
-                                style: TextStyle(
-                                  color: AppColors.primary,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text(
+                            "Sudah punya akun? Login",
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
                             ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ResetPasswordPage(),
-                                  ),
-                                );
-                              },
-                              child: const Text(
-                                "Lupa password?",
-                                style: TextStyle(
-                                  color: AppColors.primary,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ],
                     ),

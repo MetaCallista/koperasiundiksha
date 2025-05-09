@@ -20,17 +20,13 @@ class _PembayaranPageState extends State<PembayaranPage> {
   final nominalController = TextEditingController();
 
   final List<String> jenisPembayaranList = [
-    'Iuran Bulanan',
-    'Simpanan Pokok',
-    'Simpanan Wajib',
-    'Simpanan Sukarela',
+    'Iuran BEM FTK',
+    'Iuran HMJ TI',
+    'UKT',
   ];
 
   final List<String> metodePembayaranList = [
-    'BI Fast',
     'Saldo Koperasi',
-    'Transfer Online',
-    'Dompet Digital',
   ];
 
   final List<String> bankList = [
@@ -44,20 +40,15 @@ class _PembayaranPageState extends State<PembayaranPage> {
   String getDeskripsiMetodePembayaran(String? metode) {
     switch (metode) {
       case 'Saldo Koperasi':
-        return 'Waktu pembayaran cepat, biasanya hanya beberapa menit, dengan biaya admin Rp 2.500,- per transaksi.';
-      case 'BI Fast':
-        return 'Waktu pembayaran cepat, biasanya hanya beberapa menit, dengan biaya admin Rp 6.500,- per transaksi.';
-      case 'Transfer Online':
-        return 'Pembayaran melalui transfer bank biasa yang dapat memakan waktu beberapa jam, biaya admin Rp 10.000,-.';
-      case 'Dompet Digital':
-        return 'Pembayaran melalui dompet digital seperti OVO, GoPay, atau Dana dengan biaya admin rendah atau tanpa biaya.';
+        return 'Waktu pembayaran cepat, tanpa biaya admin.';
       default:
         return '';
     }
   }
 
   void _showSuccessNotification() {
-    final nominal = int.tryParse(nominalController.text.replaceAll('.', '')) ?? 0;
+    final nominal =
+        int.tryParse(nominalController.text.replaceAll('.', '')) ?? 0;
 
     // Pastikan nominal valid
     if (nominal <= 0) {
@@ -65,21 +56,29 @@ class _PembayaranPageState extends State<PembayaranPage> {
     }
 
     // Ambil saldo dari Provider
-    final balanceProvider = Provider.of<BalanceProvider>(context, listen: false);
+    final balanceProvider = Provider.of<BalanceProvider>(
+      context,
+      listen: false,
+    );
 
     // Cek apakah saldo mencukupi
     if (balanceProvider.saldo < nominal) {
       _showErrorNotification();
     } else {
       // Jika saldo cukup, proses pembayaran
-      balanceProvider.kurangiSaldo(nominal.toDouble()); // Mengurangi saldo dengan menggunakan metode dari BalanceProvider
+      balanceProvider.kurangiSaldo(
+        nominal.toDouble(),
+      ); // Mengurangi saldo dengan menggunakan metode dari BalanceProvider
 
       // Menambahkan mutasi pengeluaran ke MutasiProvider
-      final mutasiProvider = Provider.of<MutasiProvider>(context, listen: false);
+      final mutasiProvider = Provider.of<MutasiProvider>(
+        context,
+        listen: false,
+      );
       mutasiProvider.tambahMutasi(
-        'pengeluaran',       // Tipe transaksi adalah pengeluaran
-        jenisPembayaran ?? '',  // Deskripsi pembayaran
-        nominal.toDouble(),    // Nominal pengeluaran
+        'pengeluaran', // Tipe transaksi adalah pengeluaran
+        jenisPembayaran ?? '', // Deskripsi pembayaran
+        nominal.toDouble(), // Nominal pengeluaran
         DateTime.now().toString(), // Tanggal transaksi
       );
 
@@ -89,16 +88,17 @@ class _PembayaranPageState extends State<PembayaranPage> {
         builder: (context) {
           return AlertDialog(
             title: const Text('Pembayaran Berhasil'),
-            content: const Text('Terima kasih, pembayaran Anda telah diproses.'),
+            content: const Text(
+              'Terima kasih, pembayaran Anda telah diproses.',
+            ),
             actions: [
               TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => HomePage()),
-                  );
-                },
+                onPressed:
+                    () => Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      '/home',
+                      (route) => false,
+                    ),
                 child: const Text('OK'),
               ),
             ],
@@ -114,7 +114,9 @@ class _PembayaranPageState extends State<PembayaranPage> {
       builder: (context) {
         return AlertDialog(
           title: const Text('Pembayaran Gagal'),
-          content: const Text('Saldo Anda tidak mencukupi untuk melakukan pembayaran.'),
+          content: const Text(
+            'Saldo Anda tidak mencukupi untuk melakukan pembayaran.',
+          ),
           actions: [
             TextButton(
               onPressed: () {
@@ -131,7 +133,8 @@ class _PembayaranPageState extends State<PembayaranPage> {
   @override
   void initState() {
     super.initState();
-    nominalController.clear(); // Mengosongkan controller saat halaman pertama kali dibuka
+    nominalController
+        .clear(); // Mengosongkan controller saat halaman pertama kali dibuka
   }
 
   @override
@@ -174,12 +177,10 @@ class _PembayaranPageState extends State<PembayaranPage> {
                 "Pilih Jenis Pembayaran",
                 style: TextStyle(color: Colors.grey), // Ukuran huruf kecil
               ),
-              items: jenisPembayaranList.map((jenis) {
-                return DropdownMenuItem(
-                  value: jenis,
-                  child: Text(jenis),
-                );
-              }).toList(),
+              items:
+                  jenisPembayaranList.map((jenis) {
+                    return DropdownMenuItem(value: jenis, child: Text(jenis));
+                  }).toList(),
               onChanged: (value) {
                 setState(() {
                   jenisPembayaran = value;
@@ -211,7 +212,9 @@ class _PembayaranPageState extends State<PembayaranPage> {
                   borderSide: BorderSide(color: AppColors.border),
                 ),
                 hintText: "Contoh : 1000000",
-                hintStyle: TextStyle(color: Colors.grey), // Hint text abu dan ukuran kecil
+                hintStyle: TextStyle(
+                  color: Colors.grey,
+                ), // Hint text abu dan ukuran kecil
               ),
             ),
             const SizedBox(height: 20),
@@ -229,12 +232,10 @@ class _PembayaranPageState extends State<PembayaranPage> {
                 "Pilih Metode Pembayaran",
                 style: TextStyle(color: Colors.grey), // Ukuran huruf kecil
               ),
-              items: metodePembayaranList.map((metode) {
-                return DropdownMenuItem(
-                  value: metode,
-                  child: Text(metode),
-                );
-              }).toList(),
+              items:
+                  metodePembayaranList.map((metode) {
+                    return DropdownMenuItem(value: metode, child: Text(metode));
+                  }).toList(),
               onChanged: (value) {
                 setState(() {
                   metodePembayaran = value;
@@ -273,7 +274,10 @@ class _PembayaranPageState extends State<PembayaranPage> {
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
-                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 30,
+                    vertical: 15,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),

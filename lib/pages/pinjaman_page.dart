@@ -3,7 +3,7 @@ import 'package:koperasi_undiksha/pages/home_page.dart';
 import 'package:koperasi_undiksha/widgets/app_colors.dart';
 import 'package:provider/provider.dart';
 import '../providers/balance_provider.dart';
-import '../providers/mutasi_provider.dart';  // Import MutasiProvider
+import '../providers/mutasi_provider.dart'; // Import MutasiProvider
 
 class PinjamanPage extends StatefulWidget {
   const PinjamanPage({super.key});
@@ -29,7 +29,8 @@ class _PinjamanPageState extends State<PinjamanPage> {
         nominalController.text.isNotEmpty &&
         durasiController.text.isNotEmpty) {
       // Parsing the nominal pinjaman (loan amount)
-      final nominal = int.tryParse(nominalController.text.replaceAll('.', '')) ?? 0;
+      final nominal =
+          int.tryParse(nominalController.text.replaceAll('.', '')) ?? 0;
 
       // Check if the loan amount is valid
       if (nominal <= 0) {
@@ -40,13 +41,19 @@ class _PinjamanPageState extends State<PinjamanPage> {
       }
 
       // Get the current balance using BalanceProvider
-      final balanceProvider = Provider.of<BalanceProvider>(context, listen: false);
+      final balanceProvider = Provider.of<BalanceProvider>(
+        context,
+        listen: false,
+      );
 
       // Add the loan amount to the current balance using BalanceProvider
       balanceProvider.tambahSaldo(nominal.toDouble());
 
       // Menambahkan mutasi pinjaman
-      final mutasiProvider = Provider.of<MutasiProvider>(context, listen: false);
+      final mutasiProvider = Provider.of<MutasiProvider>(
+        context,
+        listen: false,
+      );
       mutasiProvider.tambahMutasi(
         'Pemasukan', // Tipe mutasi
         'Pinjaman: ${selectedJenisPinjaman}', // Deskripsi mutasi
@@ -57,22 +64,24 @@ class _PinjamanPageState extends State<PinjamanPage> {
       // Show success message
       showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Pengajuan Berhasil"),
-          content: const Text("Pengajuan pinjaman Anda telah berhasil dikirim."),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => HomePage()),
-                );
-              },
-              child: const Text("OK"),
+        builder:
+            (context) => AlertDialog(
+              title: const Text("Pengajuan Berhasil"),
+              content: const Text(
+                "Pengajuan pinjaman Anda telah berhasil dikirim.",
+              ),
+              actions: [
+                TextButton(
+                  onPressed:
+                      () => Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        '/home',
+                        (route) => false,
+                      ),
+                  child: const Text("OK"),
+                ),
+              ],
             ),
-          ],
-        ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -125,12 +134,10 @@ class _PinjamanPageState extends State<PinjamanPage> {
               ),
               hint: const Text("Pilih Jenis Pinjaman"),
               value: selectedJenisPinjaman,
-              items: jenisPinjamanList.map((jenis) {
-                return DropdownMenuItem(
-                  value: jenis,
-                  child: Text(jenis),
-                );
-              }).toList(),
+              items:
+                  jenisPinjamanList.map((jenis) {
+                    return DropdownMenuItem(value: jenis, child: Text(jenis));
+                  }).toList(),
               onChanged: (value) {
                 setState(() {
                   selectedJenisPinjaman = value;

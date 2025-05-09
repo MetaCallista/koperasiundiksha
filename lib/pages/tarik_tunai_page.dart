@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/balance_provider.dart';
-import '../providers/mutasi_provider.dart'; // Import MutasiProvider
-import 'home_page.dart'; // assuming you have HomePage
+import '../providers/mutasi_provider.dart';
 import '../widgets/app_colors.dart';
 
 class TarikTunaiPage extends StatefulWidget {
@@ -13,14 +12,7 @@ class TarikTunaiPage extends StatefulWidget {
 class _TarikTunaiPageState extends State<TarikTunaiPage> {
   final TextEditingController _jumlahController = TextEditingController();
   String _message = '';
-
-  String? _selectedSumberDana;
   String? _selectedJalurTarik;
-
-  final List<String> sumberDanaOptions = [
-    'Saldo Koperasi',
-    'Deposito',
-  ];
 
   final List<String> jalurTarikOptions = [
     'Loket Koperasi',
@@ -30,14 +22,8 @@ class _TarikTunaiPageState extends State<TarikTunaiPage> {
 
   void _tarikUang() {
     final jumlah = int.tryParse(_jumlahController.text);
-    final saldoSekarang = Provider.of<BalanceProvider>(context, listen: false).saldo;
-
-    if (_selectedSumberDana == null || _selectedJalurTarik == null) {
-      setState(() {
-        _message = "Silakan pilih sumber dana dan jalur tarik tunai.";
-      });
-      return;
-    }
+    final saldoSekarang =
+        Provider.of<BalanceProvider>(context, listen: false).saldo;
 
     if (jumlah == null || jumlah <= 0) {
       setState(() {
@@ -53,22 +39,22 @@ class _TarikTunaiPageState extends State<TarikTunaiPage> {
       return;
     }
 
-    // Use BalanceProvider to update the saldo
-    Provider.of<BalanceProvider>(context, listen: false).kurangiSaldo(jumlah.toDouble());
+    Provider.of<BalanceProvider>(
+      context,
+      listen: false,
+    ).kurangiSaldo(jumlah.toDouble());
 
-    // Menambahkan transaksi ke MutasiProvider
     Provider.of<MutasiProvider>(context, listen: false).tambahMutasi(
-      'pengeluaran', // Tipe pengeluaran karena ini penarikan
-      'Tarik Tunai dari $_selectedSumberDana melalui $_selectedJalurTarik',
+      'pengeluaran',
+      'Tarik Tunai dari Saldo Koperasi melalui $_selectedJalurTarik',
       jumlah.toDouble(),
-      DateTime.now().toString(), // Tanggal transaksi
+      DateTime.now().toString(),
     );
 
     setState(() {
       _message =
-          "Penarikan sebesar Rp. $jumlah berhasil dari $_selectedSumberDana melalui $_selectedJalurTarik.\nSisa saldo: Rp. ${Provider.of<BalanceProvider>(context, listen: false).saldo}";
+          "Penarikan sebesar Rp. $jumlah berhasil melalui $_selectedJalurTarik.\nSisa saldo: Rp. ${Provider.of<BalanceProvider>(context, listen: false).saldo}";
       _jumlahController.clear();
-      _selectedSumberDana = null;
       _selectedJalurTarik = null;
     });
   }
@@ -80,25 +66,22 @@ class _TarikTunaiPageState extends State<TarikTunaiPage> {
         backgroundColor: AppColors.primary,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => HomePage()),
-            );
-          },
+          onPressed:
+              () => Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/home',
+                (route) => false,
+              ),
         ),
         centerTitle: true,
-        title: const Text(
-          "Tarik Tunai",
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text("Tarik Tunai", style: TextStyle(color: Colors.white)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Card Saldo dengan ValueListenableBuilder
+            // Card Saldo
             Container(
               width: double.infinity,
               margin: const EdgeInsets.symmetric(vertical: 8),
@@ -159,7 +142,7 @@ class _TarikTunaiPageState extends State<TarikTunaiPage> {
 
             const SizedBox(height: 20),
 
-            // Form input
+            // Form Input Jumlah dan Jalur
             Card(
               elevation: 3,
               shape: RoundedRectangleBorder(
@@ -172,7 +155,10 @@ class _TarikTunaiPageState extends State<TarikTunaiPage> {
                   children: [
                     const Text(
                       "Masukkan jumlah yang ingin ditarik:",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     TextField(
@@ -188,34 +174,14 @@ class _TarikTunaiPageState extends State<TarikTunaiPage> {
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
-                      value: _selectedSumberDana,
-                      items: sumberDanaOptions.map((value) {
-                        return DropdownMenuItem(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                      decoration: InputDecoration(
-                        labelText: "Sumber Dana",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedSumberDana = value;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
                       value: _selectedJalurTarik,
-                      items: jalurTarikOptions.map((value) {
-                        return DropdownMenuItem(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
+                      items:
+                          jalurTarikOptions.map((value) {
+                            return DropdownMenuItem(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
                       decoration: InputDecoration(
                         labelText: "Jalur Tarik Tunai",
                         border: OutlineInputBorder(
@@ -259,17 +225,19 @@ class _TarikTunaiPageState extends State<TarikTunaiPage> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: _message.contains("berhasil")
-                      ? AppColors.income.withOpacity(0.2)
-                      : AppColors.expense.withOpacity(0.2),
+                  color:
+                      _message.contains("berhasil")
+                          ? AppColors.income.withOpacity(0.2)
+                          : AppColors.expense.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   _message,
                   style: TextStyle(
-                    color: _message.contains("berhasil")
-                        ? AppColors.income
-                        : AppColors.expense,
+                    color:
+                        _message.contains("berhasil")
+                            ? AppColors.income
+                            : AppColors.expense,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),

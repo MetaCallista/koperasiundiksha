@@ -8,5 +8,7 @@ class AppColors {
   static const Color border = Color(0xFFE0E0E0);  
   static const Color shadow = Colors.grey;       
   static const Color textPrimary = Colors.black;  
-  static const Color textSecondary = Colors.grey; 
+  static const Color textSecondary = Colors.grey;
+
+  static var card; 
 }

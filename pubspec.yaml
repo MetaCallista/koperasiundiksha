@@ -37,7 +37,9 @@ dependencies:
   provider: ^6.1.1
   shared_preferences: ^2.0.15
   fl_chart: ^0.66.2
-
+  another_flushbar: ^1.10.28
+  permission_handler: ^11.3.0
+  
 
 dev_dependencies:
   flutter_test:

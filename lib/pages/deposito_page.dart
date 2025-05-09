@@ -59,10 +59,21 @@ class _DepositoPageState extends State<DepositoPage> {
                 final duration = durationController.text;
                 final interest = interestController.text;
 
-                if (amount.isNotEmpty && duration.isNotEmpty && interest.isNotEmpty) {
-                  final depositoProvider = Provider.of<DepositoProvider>(context, listen: false);
-                  final balanceProvider = Provider.of<BalanceProvider>(context, listen: false);
-                  final mutasiProvider = Provider.of<MutasiProvider>(context, listen: false); // Mendapatkan MutasiProvider
+                if (amount.isNotEmpty &&
+                    duration.isNotEmpty &&
+                    interest.isNotEmpty) {
+                  final depositoProvider = Provider.of<DepositoProvider>(
+                    context,
+                    listen: false,
+                  );
+                  final balanceProvider = Provider.of<BalanceProvider>(
+                    context,
+                    listen: false,
+                  );
+                  final mutasiProvider = Provider.of<MutasiProvider>(
+                    context,
+                    listen: false,
+                  ); // Mendapatkan MutasiProvider
 
                   bool success = depositoProvider.addDeposito(
                     amount: amount,
@@ -74,10 +85,10 @@ class _DepositoPageState extends State<DepositoPage> {
                   // Jika deposito berhasil, catat mutasi
                   if (success) {
                     mutasiProvider.tambahMutasi(
-                      'Deposito Baru', 
-                      'Buka deposito Rp $amount, Durasi: $duration, Bunga: $interest', 
-                      double.parse(amount.replaceAll(RegExp(r'[^\d]'), '')), 
-                      DateTime.now().toString()
+                      'Deposito Baru',
+                      'Buka deposito Rp $amount, Durasi: $duration, Bunga: $interest',
+                      double.parse(amount.replaceAll(RegExp(r'[^\d]'), '')),
+                      DateTime.now().toString(),
                     );
                   }
 
@@ -116,21 +127,17 @@ class _DepositoPageState extends State<DepositoPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text(
-            "Deposito",
-            style: TextStyle(color: Colors.white),
-          ),
+          title: const Text("Deposito", style: TextStyle(color: Colors.white)),
           centerTitle: true,
           backgroundColor: AppColors.primary,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => HomePage()),
-                (route) => false,
-              );
-            },
+            onPressed:
+                () => Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/home',
+                  (route) => false,
+                ),
           ),
         ),
         body: Padding(
@@ -153,7 +160,11 @@ class _DepositoPageState extends State<DepositoPage> {
                   double totalDeposito = 0;
                   depositoProvider.depositoList.forEach((deposito) {
                     final amountString = deposito['amount']!;
-                    final amount = double.tryParse(amountString.replaceAll(RegExp(r'[^\d]'), '')) ?? 0;
+                    final amount =
+                        double.tryParse(
+                          amountString.replaceAll(RegExp(r'[^\d]'), ''),
+                        ) ??
+                        0;
                     totalDeposito += amount;
                   });
 
@@ -168,7 +179,10 @@ class _DepositoPageState extends State<DepositoPage> {
                       children: [
                         const Text(
                           "Total Deposito:",
-                          style: TextStyle(fontSize: 16, color: AppColors.textPrimary),
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                         SizedBox(height: 5),
                         Text(
@@ -224,7 +238,10 @@ class _DepositoPageState extends State<DepositoPage> {
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
                     textStyle: const TextStyle(fontSize: 16),
                   ),
                 ),
@@ -240,7 +257,12 @@ class _DepositoPageState extends State<DepositoPage> {
     return value.toStringAsFixed(0);
   }
 
-  static Widget _buildDepositoItem(String title, String amount, String duration, String interest) {
+  static Widget _buildDepositoItem(
+    String title,
+    String amount,
+    String duration,
+    String interest,
+  ) {
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: ListTile(

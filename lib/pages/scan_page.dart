@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
-import '../widgets/app_colors.dart'; 
+import '../widgets/app_colors.dart';
 
 class ScanPage extends StatefulWidget {
   @override
@@ -36,29 +36,30 @@ class _ScanPageState extends State<ScanPage> {
   void _showResultDialog(String result) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text(
-          "Hasil Scan",
-          style: TextStyle(color: AppColors.textPrimary),
-        ),
-        content: Text(
-          result,
-          style: const TextStyle(color: AppColors.textSecondary),
-        ),
-        backgroundColor: AppColors.background,
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              controller?.resumeCamera();
-            },
-            child: const Text(
-              "Tutup",
-              style: TextStyle(color: AppColors.primary),
+      builder:
+          (context) => AlertDialog(
+            title: const Text(
+              "Hasil Scan",
+              style: TextStyle(color: AppColors.textPrimary),
             ),
+            content: Text(
+              result,
+              style: const TextStyle(color: AppColors.textSecondary),
+            ),
+            backgroundColor: AppColors.background,
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  controller?.resumeCamera();
+                },
+                child: const Text(
+                  "Tutup",
+                  style: TextStyle(color: AppColors.primary),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -84,10 +85,7 @@ class _ScanPageState extends State<ScanPage> {
           // QR Code Scanner
           Expanded(
             flex: 4,
-            child: QRView(
-              key: qrKey,
-              onQRViewCreated: _onQRViewCreated,
-            ),
+            child: QRView(key: qrKey, onQRViewCreated: _onQRViewCreated),
           ),
           // Hasil Scan
           Expanded(

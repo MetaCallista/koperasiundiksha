@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/user_provider.dart';
-import '../providers/balance_provider.dart'; // Tambahkan import BalanceProvider
+import '../providers/balance_provider.dart';
 import '../widgets/profile_card.dart';
 import '../widgets/custom_menu_button.dart';
 import '../widgets/bottom_navbar.dart';
 import '../widgets/app_colors.dart';
 
 class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -38,18 +39,50 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _logout(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isLoggedIn', false);
-    await prefs.remove('username');
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Konfirmasi Logout'),
+            content: const Text('Apakah Anda yakin ingin keluar?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Batal'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text(
+                  'Logout',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
+          ),
+    );
 
-    Provider.of<UserProvider>(context, listen: false).clearUser();
-    Navigator.pushReplacementNamed(context, '/login');
+    if (confirmed == true) {
+      try {
+        await Provider.of<UserProvider>(context, listen: false).logout();
+        if (mounted) {
+          Navigator.of(
+            context,
+          ).pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Gagal logout: $e')));
+        }
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context);
-    final username = userProvider.username;
+    Provider.of<UserProvider>(context);
+    final balanceProvider = Provider.of<BalanceProvider>(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -77,10 +110,13 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Consumer<BalanceProvider>(
-              builder: (context, balanceProvider, _) {
+            // Profile Card with user data
+            Consumer<UserProvider>(
+              builder: (context, userProvider, _) {
                 return ProfileCard(
-                  name: username.isNotEmpty ? username : 'Putu Meta Callista',
+                  name:
+                      userProvider
+                          .fullName, // Always use the name from provider
                   balance: 'Rp. ${balanceProvider.saldo}',
                   imagePath: 'assets/profile.jpg',
                 );
@@ -88,7 +124,7 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: 10),
 
-            // Menu Utama
+            // Main Menu
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
@@ -108,7 +144,11 @@ class _HomePageState extends State<HomePage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildMenu("Saldo", Icons.account_balance_wallet, '/saldo'),
+                      _buildMenu(
+                        "Saldo",
+                        Icons.account_balance_wallet,
+                        '/saldo',
+                      ),
                       _buildMenu("Transfer", Icons.send, '/transfer'),
                       _buildMenu("Deposito", Icons.savings, '/deposito'),
                       _buildMenu("Mutasi", Icons.receipt_long, '/mutasi'),
@@ -128,7 +168,7 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: 12),
 
-            // Info Bantuan
+            // Help Info
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
@@ -163,9 +203,13 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.phone, size: 50, color: AppColors.primary),
+                    icon: const Icon(
+                      Icons.phone,
+                      size: 50,
+                      color: AppColors.primary,
+                    ),
                     onPressed: () {
-                      // Tambahkan aksi jika dibutuhkan
+                      // Add action if needed
                     },
                   ),
                 ],

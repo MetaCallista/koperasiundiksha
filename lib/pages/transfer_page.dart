@@ -19,12 +19,12 @@ class TransferPage extends StatelessWidget {
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.background),
-          onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => HomePage()),
-            );
-          },
+          onPressed:
+              () => Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/home',
+                (route) => false,
+              ),
         ),
       ),
       body: const TransferForm(),
@@ -44,16 +44,21 @@ class _TransferFormState extends State<TransferForm> {
   final TextEditingController jumlahController = TextEditingController();
   String selectedBank = "Bank Mandiri";
 
-  final List<String> daftarBank = ["Bank Mandiri", "Bank BRI", "Bank BNI", "Bank BCA"];
+  final List<String> daftarBank = [
+    "Bank Mandiri",
+    "Bank BRI",
+    "Bank BNI",
+    "Bank BCA",
+  ];
 
   void _konfirmasiTransfer() {
     String rekening = rekeningController.text.trim();
     String jumlah = jumlahController.text.trim();
 
     if (rekening.isEmpty || jumlah.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Harap isi semua kolom!")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Harap isi semua kolom!")));
       return;
     }
 
@@ -65,7 +70,8 @@ class _TransferFormState extends State<TransferForm> {
       return;
     }
 
-    double currentSaldo = Provider.of<BalanceProvider>(context, listen: false).saldo;
+    double currentSaldo =
+        Provider.of<BalanceProvider>(context, listen: false).saldo;
 
     if (jumlahDouble > currentSaldo) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -83,7 +89,10 @@ class _TransferFormState extends State<TransferForm> {
           bank: selectedBank,
           onConfirm: () {
             // ✅ Kurangi saldo
-            Provider.of<BalanceProvider>(context, listen: false).kurangiSaldo(jumlahDouble);
+            Provider.of<BalanceProvider>(
+              context,
+              listen: false,
+            ).kurangiSaldo(jumlahDouble);
 
             // ✅ Tambahkan ke mutasi
             Provider.of<MutasiProvider>(context, listen: false).tambahMutasi(
@@ -116,7 +125,11 @@ class _TransferFormState extends State<TransferForm> {
         children: [
           const Text(
             "Rekening Tujuan",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
           ),
           TextField(
             controller: rekeningController,
@@ -124,34 +137,50 @@ class _TransferFormState extends State<TransferForm> {
             decoration: const InputDecoration(
               hintText: "Masukkan nomor rekening",
               hintStyle: TextStyle(color: AppColors.textSecondary),
-              border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.border)),
+              border: OutlineInputBorder(
+                borderSide: BorderSide(color: AppColors.border),
+              ),
               prefixIcon: Icon(Icons.account_balance, color: AppColors.primary),
             ),
           ),
           const SizedBox(height: 16),
           const Text(
             "Bank Tujuan",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
           ),
           DropdownButtonFormField(
             value: selectedBank,
-            items: daftarBank.map((bank) {
-              return DropdownMenuItem(value: bank, child: Text(bank));
-            }).toList(),
+            items:
+                daftarBank.map((bank) {
+                  return DropdownMenuItem(value: bank, child: Text(bank));
+                }).toList(),
             onChanged: (value) {
               setState(() {
                 selectedBank = value.toString();
               });
             },
             decoration: const InputDecoration(
-              border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.border)),
-              prefixIcon: Icon(Icons.account_balance_wallet, color: AppColors.primary),
+              border: OutlineInputBorder(
+                borderSide: BorderSide(color: AppColors.border),
+              ),
+              prefixIcon: Icon(
+                Icons.account_balance_wallet,
+                color: AppColors.primary,
+              ),
             ),
           ),
           const SizedBox(height: 16),
           const Text(
             "Jumlah Transfer",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
           ),
           TextField(
             controller: jumlahController,
@@ -159,7 +188,9 @@ class _TransferFormState extends State<TransferForm> {
             decoration: const InputDecoration(
               hintText: "Contoh : 1000000",
               hintStyle: TextStyle(color: AppColors.textSecondary),
-              border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.border)),
+              border: OutlineInputBorder(
+                borderSide: BorderSide(color: AppColors.border),
+              ),
               prefixIcon: Icon(Icons.money, color: AppColors.primary),
             ),
           ),
@@ -201,7 +232,10 @@ class TransferConfirmationDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text("Konfirmasi Transfer", style: TextStyle(color: AppColors.textPrimary)),
+      title: const Text(
+        "Konfirmasi Transfer",
+        style: TextStyle(color: AppColors.textPrimary),
+      ),
       content: Text(
         "Anda akan mentransfer Rp. ${jumlah.toStringAsFixed(0)} ke rekening $rekening di $bank.",
         style: const TextStyle(color: AppColors.textSecondary),
@@ -209,7 +243,10 @@ class TransferConfirmationDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text("Batal", style: TextStyle(color: AppColors.expense)),
+          child: const Text(
+            "Batal",
+            style: TextStyle(color: AppColors.expense),
+          ),
         ),
         ElevatedButton(
           onPressed: () {

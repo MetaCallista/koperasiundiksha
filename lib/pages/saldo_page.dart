@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:koperasi_undiksha/pages/home_page.dart';
 import 'package:koperasi_undiksha/providers/balance_provider.dart';
 import 'package:provider/provider.dart';
 import '../widgets/app_colors.dart';
@@ -20,12 +19,12 @@ class SaldoPage extends StatelessWidget {
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.background),
-          onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => HomePage()),
-            );
-          },
+          onPressed:
+              () => Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/home',
+                (route) => false,
+              ),
         ),
       ),
       body: Padding(
@@ -63,10 +62,7 @@ class SaldoCard extends StatelessWidget {
   final double saldoSaatIni;
   final VoidCallback onRefresh;
 
-  const SaldoCard({
-    required this.saldoSaatIni,
-    required this.onRefresh,
-  });
+  const SaldoCard({required this.saldoSaatIni, required this.onRefresh});
 
   @override
   Widget build(BuildContext context) {
