@@ -126,6 +126,7 @@ class _DepositoPageState extends State<DepositoPage> {
         return false;
       },
       child: Scaffold(
+        backgroundColor: AppColors.background,
         appBar: AppBar(
           title: const Text("Deposito", style: TextStyle(color: Colors.white)),
           centerTitle: true,

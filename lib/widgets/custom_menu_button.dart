@@ -17,7 +17,7 @@ class CustomMenuButton extends StatelessWidget {
     return GestureDetector(
       onTap: onPressed,
       child: Container(
-        width: double.infinity, // Biar menyesuaikan lebar parent Grid
+        width: double.infinity, 
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
         decoration: BoxDecoration(
           color: Colors.grey.shade100,

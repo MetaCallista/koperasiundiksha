@@ -62,6 +62,7 @@ class _TarikTunaiPageState extends State<TarikTunaiPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         leading: IconButton(
@@ -102,7 +103,7 @@ class _TarikTunaiPageState extends State<TarikTunaiPage> {
                         ),
                         child: const Icon(
                           Icons.account_balance_wallet,
-                          color: Colors.white,
+                          color: AppColors.background,
                           size: 28,
                         ),
                       ),
@@ -115,7 +116,7 @@ class _TarikTunaiPageState extends State<TarikTunaiPage> {
                               "Saldo Anda",
                               style: TextStyle(
                                 fontSize: 16,
-                                color: Colors.black,
+                                color: AppColors.textPrimary,
                               ),
                             ),
                             const SizedBox(height: 4),
@@ -126,7 +127,7 @@ class _TarikTunaiPageState extends State<TarikTunaiPage> {
                                   style: const TextStyle(
                                     fontSize: 22,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.black,
+                                    color: AppColors.textPrimary,
                                   ),
                                 );
                               },
