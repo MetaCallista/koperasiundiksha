@@ -65,8 +65,18 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Reset Password'),
         backgroundColor: AppColors.primary,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed:
+              () => Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/login',
+                (route) => false,
+              ),
+        ),
+        centerTitle: true,
+        title: const Text("Reset Password", style: TextStyle(color: Colors.white)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -126,10 +136,23 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 ),
               SizedBox(height: 20),
               _isLoading
-                  ? CircularProgressIndicator()
-                  : ElevatedButton(
+                ? const CircularProgressIndicator()
+                : ElevatedButton(
                     onPressed: _resetPassword,
-                    child: Text('Reset Password'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary, // ganti dengan Theme.of(context).primaryColor jika pakai tema
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 14,
+                        horizontal: 60,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    child: const Text(
+                      'Reset Password',
+                      style: TextStyle(color: Colors.white), // pastikan teks kontras
+                    ),
                   ),
             ],
           ),
